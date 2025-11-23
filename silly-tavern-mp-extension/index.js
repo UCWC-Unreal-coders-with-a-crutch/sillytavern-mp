@@ -33,13 +33,18 @@ function sendChatHistory() {
 
   const chatHistory = getContext().chat;
 
+  console.log(chatHistory.length);
+
+  let fakeHistory = chatHistory.length > 10 ? chatHistory.slice(-10) : chatHistory;
+
+  console.log(fakeHistory);
   // POST this data to url
   fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(chatHistory),
+    body: JSON.stringify(fakeHistory),
   }).then(response => {
     if (response.ok) {
       console.log('Chat history sent successfully');
