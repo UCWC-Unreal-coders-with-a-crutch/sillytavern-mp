@@ -4,11 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SillyTavern Client</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <style>
         body {
-            max-width: 700px;
-            margin-left: auto;
-            margin-right: auto;
+            background-color: #222222;
+            height: 100%;
+      margin: 0;
+      padding: 0;
             font-family: sans-serif;
         }
 
@@ -20,7 +22,6 @@
         }
 
         #chat .message {
-            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
             border-radius: 15px;
             padding: 10px 15px;
             margin: 5px 0;
@@ -31,80 +32,109 @@
         }
 
         #chat .message .title {
+            color: rgb(179, 179, 223);
             font-weight: bold;
             margin-bottom: 5px;
         }
 
 
-        #chat .message.user {
-            background: linear-gradient(135deg, #d1e7ff, #a8d8ff);
+        #chat .message.local_user {
+            background: #303030;
+            color: rgb(209, 209, 209);
             align-self: flex-end;
+            margin-right: 15px;
+            margin-bottom: 15px;
+            margin-top: 10px;
         }
 
         #chat .message.bot {
-            background: linear-gradient(135deg, #f9f9f9, #eaeaea);
+            background: #474747;
+            color: rgb(179, 179, 179);
             align-self: flex-start;
+            margin-left: 15px;
+            margin-bottom: 15px;
+            margin-top: 10px;
+        }
+
+        #chat .message.user {
+            background: #222222;
+            color: rgb(209, 209, 209);
+            align-self: flex-start;
+            margin-left: 15px;
+            margin-bottom: 15px;
+            margin-top: 10px;
         }
 
         #chat .message.user.ghost {
             opacity: 0.5;
         }
 
-        #chat-input {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            max-width: 700px;
-            background-color: #ffffff;
-            padding: 10px;
-            margin-bottom: 32px;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-        }
-
-        #chat-input input {
-            width: calc(100% - 20px);
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-        }
-
-        #chat-input input:focus {
-            outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
-        }
-
         #character-name {
-            position: absolute;
-            right: 100%;
-            top: 0;
             width: 300px;
             background-color: #eee;
             padding: 10px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+        .form-control::placeholder {
+        color: #ced4da !important;
+        }
+
+        .full-page-container {
+        min-height: 100vh;          /* fallback for older browsers */
+        height: 100%;               /* takes full viewport height */
+        padding: 0;                 /* removes default Bootstrap padding */
+        margin: 0;
+        }
+
+        i {
+            color: orange !important;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
-    <div id="chat">
+    <div class="container-fluid full-page-container">
 
-    </div>
 
-    <div id="chat-input">
-        <input type="text" id="message" placeholder="Type your message here..." />
-        <div id="character-name">
-            <label for="name">Send messages as</label>
-            <input type="text" id="name" placeholder="Character Name" value="Liam" />
-        </div>    
+        <div class="container text-center">
+            <div class="row py-3">
+              <div class="col ">
+                <div class="border border-1 hide-scrollbar " id="chat" style="overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none;" >
+
+                </div>
+              </div>
+            </div>
+
+            <div class="row my-3 fixed-bottom" style="margin-right: px; margin-left: 18px;">
+                <div class="col">
+                    <div class="input-group mb-3 py-5">
+                        <textarea type="text" id="message" class="form-control text-light bg-dark" placeholder="Type your message here..." aria-label="Type your message here..." aria-describedby="basic-addon1"></textarea>
+                        <div style="margin-left: 5px; margin-right: 5px;"></div>
+                        <button type="button" id="message_send_btn" class="btn btn-secondary">Send</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row border border-1 mb-3 fixed-bottom" style="margin-right: 30px; margin-left: 30px;">
+
+                <div class="col">
+                    <label class="text-light" for="name">Send messages as</label>
+                </div>
+                <div class="col">
+                    <input type="text" id="name" class="form-control text-light bg-dark" aria-label="Character Name" aria-describedby="basic-addon1" placeholder="Character Name" value="Valor" />
+                </div>
+            </div>
+          </div>
     </div>
     
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
     <script>
         let lastHistoryString = '';
+
+
 
         async function fetchChatHistory() {
             const response = await fetch('/get-chat');
@@ -120,18 +150,19 @@
             chatDiv.innerHTML = ''; // Clear existing messages
             chatHistory.forEach(message => {
                 const messageDiv = document.createElement('div');
-                
                 const { name , is_user, mes } = message;
                 
                 const messageTitle = document.createElement('div');
                 messageTitle.className = 'title';
                 messageTitle.textContent = name;
-                
+                let local_is_user = name === document.getElementById('name').value;
+
                 messageDiv.appendChild(messageTitle);
                 messageDiv.innerHTML += mes; // Append the message content
-                messageDiv.className = 'message' + (is_user ? ' user' : ' bot');
-
-                // surround * by italic tags:
+                messageDiv.className = 'message' + (local_is_user ? ' local_user' : is_user ? ' user' : ' bot');
+                messageDiv.style = 'white-space: pre-wrap;';
+                messageDiv.classList.add('border');
+                messageDiv.classList.add('border-primary-subtle');
                 messageDiv.innerHTML = messageDiv.innerHTML.replace(/\*(.*?)\*/g, '<i>$1</i>');
 
                 chatDiv.appendChild(messageDiv);
@@ -141,7 +172,7 @@
         }
 
         fetchChatHistory();
-        setInterval(fetchChatHistory, 2 * 1000);
+        setInterval(fetchChatHistory, 1000);
 
         function appendGhostUserMessage(name, message) {
             const chatDiv = document.getElementById('chat');
@@ -154,6 +185,7 @@
             messageDiv.appendChild(messageTitle);
             messageDiv.innerHTML += message;
             messageDiv.className = 'message user ghost';
+            messageDiv.style = 'white-space: pre-wrap;';
 
             // surround * by italic tags:
             messageDiv.innerHTML = messageDiv.innerHTML.replace(/\*(.*?)\*/g, '<i>$1</i>');
@@ -161,10 +193,40 @@
             chatDiv.appendChild(messageDiv);
         }
 
+
+        const user_name = document.getElementById('name');
+        user_name.addEventListener('input', (e) => {
+            lastHistoryString = ''; // force refresh
+            fetchChatHistory();
+        });
+
+        const sendButton = document.getElementById('message_send_btn');
+        sendButton.addEventListener('click', async () => {
+            const messageInput = document.getElementById('message');
+            const message = messageInput.value;
+            console.log('Sending message:', message);
+            const name = document.getElementById('name').value;
+            if (message.trim() === '') return; // Ignore empty messages
+
+            // Send the message to the server
+            await fetch('/queue-message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message, name })
+            });
+
+            appendGhostUserMessage(name, message);
+
+            messageInput.value = ''; // Clear the input field
+        });
+
         const messageInput = document.getElementById('message');
         messageInput.addEventListener('keydown', async (event) => {
-            if (event.key === 'Enter') {
+            if (event.key === 'Enter' && !event.shiftKey) {
                 const message = messageInput.value;
+                console.log('Sending message:', message);
                 const name = document.getElementById('name').value;
                 if (message.trim() === '') return; // Ignore empty messages
 
